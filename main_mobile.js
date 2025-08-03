@@ -66,9 +66,8 @@ window.onload = function() {
         const trial = {
             type: jsPsychImageButtonResponse, // Use the button plugin
             stimulus: jsPsych.timelineVariable('stimulus'),
-            prompt: '<div style="font-size: 48px;">+</div>', // Fixation cross appears with buttons
+            prompt: '<p style="font-size: 24px;">Looking at me?</p>', // <-- THIS LINE IS UPDATED
             choices: ['Yes', 'No'], // Button labels
-
             render_on_canvas: false,
 
             // --- Timing Breakdown ---
