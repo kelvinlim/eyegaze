@@ -65,7 +65,7 @@ window.onload = function() {
         const trial = {
             type: jsPsychImageKeyboardResponse,
             stimulus: jsPsych.timelineVariable('stimulus'),
-            prompt: '<div style="font-size: 48px;">+</div>', // Fixation cross
+            prompt: '<div style="font-size: 48px;">Looking at me? y or n</div>', // y / n prompt
             choices: ['y', 'n'], // 'y' for Yes, 'n' for No
 
             // --- Timing Breakdown (Total Trial = 2500ms) ---
