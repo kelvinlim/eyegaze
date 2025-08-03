@@ -6,13 +6,37 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.0.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
-
     <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.0.0"></script>
-
     <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
     <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />
 
-    <script src="main_mobile.js"></script>
+    <style>
+        .jspsych-btn {
+            font-size: 20px;          /* Makes the text on the button larger */
+            padding: 15px 25px;       /* Makes the button padding larger (top/bottom, left/right) */
+            margin: 15px;             /* Adds space around each button, pushing them apart */
+            min-width: 150px;         /* Ensures the buttons have a minimum width */
+        }
+    </style>
+
+    <script>
+        // Check for touch capability, which is a reliable proxy for mobile/touch-screen devices.
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        // Create a new script element to load the correct file.
+        const script = document.createElement('script');
+
+        if (isTouchDevice) {
+            script.src = 'main_mobile.js'; // The file for touch devices
+            console.log('Touch device detected. Loading main_mobile.js');
+        } else {
+            script.src = 'main_keyboard.js'; // The file for keyboard-based devices
+            console.log('Keyboard device detected. Loading main_keyboard.js');
+        }
+
+        // Add the script element to the document's head to load and execute it.
+        document.head.appendChild(script);
+    </script>
 </head>
 <body>
     <div id="jspsych-target"></div>
