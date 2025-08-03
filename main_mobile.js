@@ -69,6 +69,8 @@ window.onload = function() {
             prompt: '<div style="font-size: 48px;">+</div>', // Fixation cross appears with buttons
             choices: ['Yes', 'No'], // Button labels
 
+            render_on_canvas: false,
+
             // --- Timing Breakdown ---
             stimulus_duration: 200,      // Image shown for 200ms
             trial_duration: 2500,        // Full trial duration including response time
