@@ -5,7 +5,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
     // --- CONFIGURATION ---
     // URL of your hosted experiment (e.g., GitHub Pages URL)
     // IMPORTANT: Change this to your actual URL
-    var experiment_url = "https://kelvinlim.github.io/eyegaze/index.html";
+    var experiment_url = "https://kelvinlim.github.io/eyegaze/index.html?qualtrics=true&test=6";
     // ---------------------
 
     // Get the container where the iframe will be placed
@@ -23,8 +23,11 @@ Qualtrics.SurveyEngine.addOnload(function () {
     var study_id = "${e://Field/StudyID}"; // Example: if you have a StudyID field
 
     // Construct the full URL with parameters
+    // Check if the URL already has parameters
+    var separator = experiment_url.indexOf('?') > -1 ? '&' : '?';
+
     // Note: We use encodeURIComponent to ensure parameters are safe
-    var full_url = experiment_url + "?sub=" + encodeURIComponent(response_id) + "&qualtrics=true";
+    var full_url = experiment_url + separator + "sub=" + encodeURIComponent(response_id) + "&qualtrics=true";
 
     if (study_id) {
         full_url += "&study=" + encodeURIComponent(study_id);
@@ -46,8 +49,12 @@ Qualtrics.SurveyEngine.addOnload(function () {
             var experiment_data = event.data.experiment_data;
 
             // Save data to Embedded Data field
-            // IMPORTANT: You must create an Embedded Data field named 'experiment_data' in Survey Flow
-            Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', experiment_data);
+            // Use setJSEmbeddedData if available, otherwise setEmbeddedData
+            if (Qualtrics.SurveyEngine.setJSEmbeddedData) {
+                Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', experiment_data);
+            } else {
+                Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', experiment_data);
+            }
 
             // Show the Next button and click it to advance
             that.showNextButton();
