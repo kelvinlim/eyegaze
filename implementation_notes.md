@@ -36,7 +36,15 @@ You can configure the experiment using URL parameters:
     - `?sub=ID`: Adds `sub: ID` to the output data.
     - Example: `index.html?study=pilot&sub=001`
 
+### 5. Qualtrics Integration
+- **Data Transfer**: Uses `window.parent.postMessage()` to send data (CSV) to the parent Qualtrics window.
+- **Qualtrics Script**: `qualtrics_code.js` contains the code to be placed in the Qualtrics "Question JavaScript" editor.
+    - Creates an iframe.
+    - Passes `ResponseID` as `sub`.
+    - Listens for data and saves it to `experiment_data` Embedded Data field.
+
 ## File Structure
 - `index.html`: Entry point. Loads `main.js` and CSS.
 - `main.js`: Core experiment logic.
+- `qualtrics_code.js`: Script for Qualtrics.
 - `images/`: Contains stimuli and `fixation_cross.svg`.

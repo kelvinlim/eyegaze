@@ -10,7 +10,23 @@ window.onload = function () {
         // When the experiment is finished, display the data in a format
         // that Qualtrics can easily save.
         on_finish: function () {
-            jsPsych.data.displayData();
+            // Check if running inside an iframe (Qualtrics) OR forced via URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const isQualtrics = (window.self !== window.top) || (urlParams.get('qualtrics') === 'true');
+
+            if (isQualtrics) {
+                // Get data as CSV
+                const csvData = jsPsych.data.get().csv();
+                console.log("Sending data to Qualtrics...");
+                // Send data to parent window
+                window.parent.postMessage({
+                    experiment_data: csvData,
+                    source: 'eyegaze_task'
+                }, '*');
+            } else {
+                // Local testing
+                jsPsych.data.displayData();
+            }
         }
     });
 
