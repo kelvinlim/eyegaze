@@ -1,81 +1,107 @@
 Qualtrics.SurveyEngine.addOnload(function () {
-    // Hide the Next button until the task is complete
-    this.hideNextButton();
+    /*Place your JavaScript here to run when the page loads*/
+    var qthis = this;
+
+    // Hide buttons
+    qthis.hideNextButton();
 
     // --- CONFIGURATION ---
-    // URL of your hosted experiment (e.g., GitHub Pages URL)
-    // IMPORTANT: Change this to your actual URL
-    var experiment_url = "https://kelvinlim.github.io/eyegaze/index.html?qualtrics=true&test=6";
+    // URL of your hosted experiment folder (must end with /)
+    var repo_url = "https://kelvinlim.github.io/eyegaze/";
     // ---------------------
 
-    // Get the container where the iframe will be placed
-    var q_container = this.getQuestionContainer();
+    // Define resources to load
+    // Note: We are using jsPsych 8.0.0 from CDN for plugins, but loading main.js from repo
+    var requiredResources = [
+        "https://unpkg.com/jspsych@8.0.0",
+        "https://unpkg.com/@jspsych/plugin-html-button-response@2.0.0",
+        "https://unpkg.com/@jspsych/plugin-image-button-response@2.0.0",
+        "https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0",
+        "https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0",
+        "https://unpkg.com/@jspsych/plugin-preload@2.0.0",
+        "https://unpkg.com/jspsych@8.0.0/css/jspsych.css",
+        repo_url + "main.js" // Load our experiment script last
+    ];
 
-    // Create the iframe
-    var iframe = document.createElement('iframe');
-    iframe.style.width = "100%";
-    iframe.style.height = "800px"; // Adjust height as needed
-    iframe.style.border = "none";
+    function loadScript(idx) {
+        console.log("Loading ", requiredResources[idx]);
+        var url = requiredResources[idx];
 
-    // Pass Qualtrics ResponseID as 'sub' parameter
-    // You can also pass other embedded data here if needed
-    var response_id = "${e://Field/ResponseID}";
-    var study_id = "${e://Field/StudyID}"; // Example: if you have a StudyID field
-
-    // Construct the full URL with parameters
-    // Check if the URL already has parameters
-    var separator = experiment_url.indexOf('?') > -1 ? '&' : '?';
-
-    // Note: We use encodeURIComponent to ensure parameters are safe
-    var full_url = experiment_url + separator + "sub=" + encodeURIComponent(response_id) + "&qualtrics=true";
-
-    if (study_id) {
-        full_url += "&study=" + encodeURIComponent(study_id);
+        if (url.endsWith(".css")) {
+            jQuery("head").append("<link rel='stylesheet' type='text/css' href='" + url + "'>");
+            if ((idx + 1) < requiredResources.length) {
+                loadScript(idx + 1);
+            } else {
+                initExp();
+            }
+        } else {
+            jQuery.getScript(url, function () {
+                if ((idx + 1) < requiredResources.length) {
+                    loadScript(idx + 1);
+                } else {
+                    initExp();
+                }
+            });
+        }
     }
 
-    iframe.src = full_url;
+    // Check if running in Qualtrics and not in preview mode (optional check)
+    if (window.Qualtrics) {
+        loadScript(0);
+    }
 
-    // Append iframe to the question container
-    q_container.appendChild(iframe);
+    // Create display stage
+    jQuery("<div id='display_stage_background'></div>").appendTo('body');
+    jQuery("<div id='display_stage'></div>").appendTo('body');
 
-    // Listen for messages from the iframe
-    var that = this;
-    var processed = false; // Guard to prevent multiple submissions
-
-    window.addEventListener('message', function (event) {
-        // Security check: verify the origin if possible (optional but recommended)
-        // if (event.origin !== "https://kelvinlim.github.io") return;
-
-        // Check if the message is from our experiment
-        if (event.data && event.data.source === 'eyegaze_task' && !processed) {
-            processed = true; // Mark as processed
-            var experiment_data = event.data.experiment_data;
-            console.log("Received data from experiment. Size: " + experiment_data.length + " bytes.");
-
-            // Helper to proceed
-            function proceed() {
-                console.log("Clicking Next button...");
-                that.showNextButton();
-                that.clickNextButton();
+    // Add CSS for display stage
+    jQuery("<style>")
+        .prop("type", "text/css")
+        .html(`
+            #display_stage_background {
+                position: fixed;
+                left: 0;
+                top: 0;
+                min-height: 100%;
+                width: 100%;
+                z-index: 10;
+                background-color: white;
             }
-
-            // Save data to Embedded Data field
-            // Use setJSEmbeddedData if available (Async), otherwise setEmbeddedData (Sync)
-            if (Qualtrics.SurveyEngine.setJSEmbeddedData) {
-                Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', experiment_data).then(function () {
-                    console.log("Data saved successfully.");
-                    setTimeout(proceed, 500); // Small delay for safety
-                }).catch(function (err) {
-                    console.error("Error saving data:", err);
-                    // Proceed anyway to avoid getting stuck
-                    setTimeout(proceed, 500);
-                });
-            } else {
-                Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', experiment_data);
-                setTimeout(proceed, 500);
+            #display_stage {
+                position: fixed;
+                left: 0;
+                top: 0;
+                min-height: 100%;
+                width: 100%;
+                z-index: 11;
             }
+            .fixation-trial {
+                background-image: url('${repo_url}images/fixation_cross.svg');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: 100px 100px; /* Adjust size as needed */
+            }
+        `)
+        .appendTo("head");
+
+    function initExp() {
+        // Get Qualtrics data
+        var response_id = "${e://Field/ResponseID}";
+        var study_id = "${e://Field/StudyID}";
+
+        // Run the experiment
+        // initEyegazeTask is defined in main.js
+        if (window.initEyegazeTask) {
+            window.initEyegazeTask({
+                study: study_id,
+                sub: response_id,
+                imageBaseUrl: repo_url,
+                trialsPerBlock: 30 // Set default or read from Embedded Data
+            });
+        } else {
+            console.error("initEyegazeTask not found!");
         }
-    });
+    }
 });
 
 Qualtrics.SurveyEngine.addOnReady(function () {
