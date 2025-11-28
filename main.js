@@ -4,6 +4,7 @@ window.initEyegazeTask = function (config) {
     const subject_id = config.sub || 'default_sub';
     const image_base_url = config.imageBaseUrl || '';
     const trials_per_block_override = config.trialsPerBlock || null;
+    const qthis = config.qthis || null; // Qualtrics object passed from qualtrics_code.js
 
     // Check for touch capability
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -13,25 +14,41 @@ window.initEyegazeTask = function (config) {
         display_element: 'display_stage', // Target specific div
         on_finish: function () {
             // Check if running in Qualtrics (Direct Injection)
-            if (window.Qualtrics && window.Qualtrics.SurveyEngine) {
+            if (qthis) {
                 const csvData = jsPsych.data.get().csv();
                 console.log("Saving data to Qualtrics (Direct)...");
 
-                // Use setJSEmbeddedData if available
-                if (Qualtrics.SurveyEngine.setJSEmbeddedData) {
+                // Helper to finish: cleanup and click next
+                function finishExp() {
+                    console.log("Cleaning up and advancing...");
+                    jQuery('#display_stage').remove();
+                    jQuery('#display_stage_background').remove();
+                    if (qthis.clickNextButton) {
+                        qthis.clickNextButton();
+                    } else {
+                        jQuery('#NextButton').click();
+                    }
+                }
+
+                // Use setJSEmbeddedData if available (preferred for async)
+                if (window.Qualtrics && window.Qualtrics.SurveyEngine && window.Qualtrics.SurveyEngine.setJSEmbeddedData) {
                     Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', csvData)
                         .then(() => {
-                            console.log("Data saved.");
-                            // Click next button
-                            jQuery('#NextButton').click();
+                            console.log("Data saved (Async).");
+                            finishExp();
                         })
                         .catch((err) => {
-                            console.error("Error saving:", err);
-                            jQuery('#NextButton').click();
+                            console.error("Error saving (Async):", err);
+                            finishExp();
                         });
-                } else {
+                } else if (window.Qualtrics && window.Qualtrics.SurveyEngine) {
+                    // Fallback to synchronous
                     Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', csvData);
-                    jQuery('#NextButton').click();
+                    console.log("Data saved (Sync).");
+                    finishExp();
+                } else {
+                    console.warn("Qualtrics API not found, but qthis was passed.");
+                    finishExp();
                 }
             } else {
                 // Local testing
