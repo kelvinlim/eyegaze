@@ -48,10 +48,12 @@ window.initEyegazeTask = function (config) {
 
     // --- Stimuli Configuration ---
     const models = ['Dean', 'Peter', 'Raymond', 'Glo', 'Mary', 'Oli'];
+    // Full list of gaze angles based on file listing
     const gazes = ['Center', 'L5', 'R5', 'L10', 'R10', 'L15', 'R15', 'L20', 'R20', 'L25', 'R25', 'L30', 'R30'];
 
     // Helper to build image path
     function getImagePath(model, gaze) {
+        // Use .png extension as found in directory
         return `${image_base_url}images/${model}_${gaze}.png`;
     }
 
@@ -74,14 +76,30 @@ window.initEyegazeTask = function (config) {
     });
 
     // Instructions
-    timeline.push({
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `
+    let instruction_html;
+    if (isTouchDevice) {
+        instruction_html = `
             <h1>Gaze Perception Task</h1>
             <p>In this task, you will see faces.</p>
             <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
+            <p>Tap <b>Yes</b> if they are looking at you.</p>
+            <p>Tap <b>No</b> if they are looking away.</p>
+            <p>Tap "Start" to begin.</p>
+        `;
+    } else {
+        instruction_html = `
+            <h1>Gaze Perception Task</h1>
+            <p>In this task, you will see faces.</p>
+            <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
+            <p>Press <b>F</b> if they are looking at you (Yes).</p>
+            <p>Press <b>J</b> if they are looking away (No).</p>
             <p>Click "Start" to begin.</p>
-        `,
+        `;
+    }
+
+    timeline.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: instruction_html,
         choices: ['Start']
     });
 
