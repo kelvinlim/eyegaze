@@ -40,32 +40,39 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
     // Listen for messages from the iframe
     var that = this;
+    var processed = false; // Guard to prevent multiple submissions
+
     window.addEventListener('message', function (event) {
         // Security check: verify the origin if possible (optional but recommended)
         // if (event.origin !== "https://kelvinlim.github.io") return;
 
         // Check if the message is from our experiment
-        if (event.data && event.data.source === 'eyegaze_task') {
+        if (event.data && event.data.source === 'eyegaze_task' && !processed) {
+            processed = true; // Mark as processed
             var experiment_data = event.data.experiment_data;
+            console.log("Received data from experiment. Size: " + experiment_data.length + " bytes.");
+
+            // Helper to proceed
+            function proceed() {
+                console.log("Clicking Next button...");
+                that.showNextButton();
+                that.clickNextButton();
+            }
 
             // Save data to Embedded Data field
             // Use setJSEmbeddedData if available (Async), otherwise setEmbeddedData (Sync)
             if (Qualtrics.SurveyEngine.setJSEmbeddedData) {
                 Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', experiment_data).then(function () {
                     console.log("Data saved successfully.");
-                    that.showNextButton();
-                    that.clickNextButton();
+                    setTimeout(proceed, 500); // Small delay for safety
                 }).catch(function (err) {
                     console.error("Error saving data:", err);
-                    // Attempt to proceed anyway or alert user?
-                    // Proceeding is usually safer to avoid getting stuck
-                    that.showNextButton();
-                    that.clickNextButton();
+                    // Proceed anyway to avoid getting stuck
+                    setTimeout(proceed, 500);
                 });
             } else {
                 Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', experiment_data);
-                that.showNextButton();
-                that.clickNextButton();
+                setTimeout(proceed, 500);
             }
         }
     });
