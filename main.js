@@ -48,11 +48,11 @@ window.initEyegazeTask = function (config) {
 
     // --- Stimuli Configuration ---
     const models = ['Dean', 'Peter', 'Raymond', 'Glo', 'Mary', 'Oli'];
-    const gazes = ['direct', 'averted'];
+    const gazes = ['Center', 'L5', 'R5', 'L10', 'R10', 'L15', 'R15', 'L20', 'R20', 'L25', 'R25', 'L30', 'R30'];
 
     // Helper to build image path
     function getImagePath(model, gaze) {
-        return `${image_base_url}images/${model}_${gaze}.jpg`;
+        return `${image_base_url}images/${model}_${gaze}.png`;
     }
 
     // Preload images
