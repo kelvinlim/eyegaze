@@ -49,16 +49,24 @@ Qualtrics.SurveyEngine.addOnload(function () {
             var experiment_data = event.data.experiment_data;
 
             // Save data to Embedded Data field
-            // Use setJSEmbeddedData if available, otherwise setEmbeddedData
+            // Use setJSEmbeddedData if available (Async), otherwise setEmbeddedData (Sync)
             if (Qualtrics.SurveyEngine.setJSEmbeddedData) {
-                Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', experiment_data);
+                Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', experiment_data).then(function () {
+                    console.log("Data saved successfully.");
+                    that.showNextButton();
+                    that.clickNextButton();
+                }).catch(function (err) {
+                    console.error("Error saving data:", err);
+                    // Attempt to proceed anyway or alert user?
+                    // Proceeding is usually safer to avoid getting stuck
+                    that.showNextButton();
+                    that.clickNextButton();
+                });
             } else {
                 Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', experiment_data);
+                that.showNextButton();
+                that.clickNextButton();
             }
-
-            // Show the Next button and click it to advance
-            that.showNextButton();
-            that.clickNextButton();
         }
     });
 });
