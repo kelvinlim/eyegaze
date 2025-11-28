@@ -76,32 +76,36 @@ window.initEyegazeTask = function (config) {
     });
 
     // Instructions
-    let instruction_html;
+    let instruction_trial;
     if (isTouchDevice) {
-        instruction_html = `
-            <h1>Gaze Perception Task</h1>
-            <p>In this task, you will see faces.</p>
-            <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
-            <p>Tap <b>Yes</b> if they are looking at you.</p>
-            <p>Tap <b>No</b> if they are looking away.</p>
-            <p>Tap "Start" to begin.</p>
-        `;
+        instruction_trial = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: `
+                <h1>Gaze Perception Task</h1>
+                <p>In this task, you will see faces.</p>
+                <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
+                <p>Tap <b>Yes</b> if they are looking at you.</p>
+                <p>Tap <b>No</b> if they are looking away.</p>
+                <p>Tap "Start" to begin.</p>
+            `,
+            choices: ['Start']
+        };
     } else {
-        instruction_html = `
-            <h1>Gaze Perception Task</h1>
-            <p>In this task, you will see faces.</p>
-            <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
-            <p>Press <b>F</b> if they are looking at you (Yes).</p>
-            <p>Press <b>J</b> if they are looking away (No).</p>
-            <p>Click "Start" to begin.</p>
-        `;
+        instruction_trial = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `
+                <h1>Gaze Perception Task</h1>
+                <p>In this task, you will see faces.</p>
+                <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
+                <p>Press <b>F</b> if they are looking at you (Yes).</p>
+                <p>Press <b>J</b> if they are looking away (No).</p>
+                <p>Press the <b>Space bar</b> to begin.</p>
+            `,
+            choices: [' ']
+        };
     }
 
-    timeline.push({
-        type: jsPsychHtmlButtonResponse,
-        stimulus: instruction_html,
-        choices: ['Start']
-    });
+    timeline.push(instruction_trial);
 
     // Trials per block logic
     let trials_per_block = 30;
