@@ -14,6 +14,18 @@ window.onload = function () {
         }
     });
 
+    // Capture URL parameters for data
+    const urlParams = new URLSearchParams(window.location.search);
+    const study_id = urlParams.get('study');
+    const subject_id = urlParams.get('sub');
+
+    if (study_id) {
+        jsPsych.data.addProperties({ study: study_id });
+    }
+    if (subject_id) {
+        jsPsych.data.addProperties({ sub: subject_id });
+    }
+
     // --- Stimuli Configuration ---
     // Using a single model for testing, as in your last version
     //const models = ['Dean', 'Peter', 'Raymond', 'Glo', 'Mary', 'Oli'];

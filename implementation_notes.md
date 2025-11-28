@@ -31,6 +31,10 @@ You can configure the experiment using URL parameters:
 - **Test Mode**: `?test=true` (Sets trials to 10).
 - **Custom Count**: `?test=N` or `?trials=N` (Sets trials to N).
     - Example: `index.html?test=5` runs 5 trials per block.
+- **Data Tagging**:
+    - `?study=NAME`: Adds `study: NAME` to the output data.
+    - `?sub=ID`: Adds `sub: ID` to the output data.
+    - Example: `index.html?study=pilot&sub=001`
 
 ## File Structure
 - `index.html`: Entry point. Loads `main.js` and CSS.
