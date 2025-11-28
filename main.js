@@ -162,11 +162,21 @@ window.initEyegazeTask = function (config) {
     timeline.push(trial_procedure);
 
     // Rest screen
-    timeline.push({
-        type: jsPsychHtmlButtonResponse,
-        stimulus: '<h1>Block Finished</h1><p>Take a short break.</p>',
-        choices: ['Continue']
-    });
+    let rest_trial;
+    if (isTouchDevice) {
+        rest_trial = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<h1>Block Finished</h1><p>Take a short break.</p>',
+            choices: ['Continue']
+        };
+    } else {
+        rest_trial = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<h1>Block Finished</h1><p>Take a short break.</p><p>Press the <b>Space bar</b> to continue.</p>',
+            choices: [' ']
+        };
+    }
+    timeline.push(rest_trial);
 
     // Run
     jsPsych.run(timeline);
