@@ -96,7 +96,8 @@ Qualtrics.SurveyEngine.addOnload(function () {
                 study: study_id,
                 sub: response_id,
                 imageBaseUrl: repo_url,
-                trialsPerBlock: 30 // Set default or read from Embedded Data
+                trialsPerBlock: 30, // Set default or read from Embedded Data
+                qthis: qthis // Pass Qualtrics object
             });
         } else {
             console.error("initEyegazeTask not found!");

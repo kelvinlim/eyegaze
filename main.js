@@ -15,7 +15,7 @@ window.initEyegazeTask = function (config) {
         on_finish: function () {
             // Check if running in Qualtrics (Direct Injection)
             if (qthis) {
-                const csvData = jsPsych.data.get().csv();
+                const jsonData = jsPsych.data.get().json();
                 console.log("Saving data to Qualtrics (Direct)...");
 
                 // Helper to finish: cleanup and click next
@@ -32,7 +32,7 @@ window.initEyegazeTask = function (config) {
 
                 // Use setJSEmbeddedData if available (preferred for async)
                 if (window.Qualtrics && window.Qualtrics.SurveyEngine && window.Qualtrics.SurveyEngine.setJSEmbeddedData) {
-                    Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', csvData)
+                    Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', jsonData)
                         .then(() => {
                             console.log("Data saved (Async).");
                             finishExp();
@@ -43,7 +43,7 @@ window.initEyegazeTask = function (config) {
                         });
                 } else if (window.Qualtrics && window.Qualtrics.SurveyEngine) {
                     // Fallback to synchronous
-                    Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', csvData);
+                    Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', jsonData);
                     console.log("Data saved (Sync).");
                     finishExp();
                 } else {
