@@ -4,7 +4,7 @@ window.initEyegazeTask = function (config) {
     const subject_id = config.sub || 'default_sub';
     const image_base_url = config.imageBaseUrl || '';
     const trials_per_block_override = config.trialsPerBlock || null;
-    const qthis = config.qthis || null; // Qualtrics object passed from qualtrics_code.js
+    const qthis = null; // No longer used in Iframe mode
 
     // Check for touch capability
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -13,45 +13,20 @@ window.initEyegazeTask = function (config) {
     const jsPsych = initJsPsych({
         display_element: 'display_stage', // Target specific div
         on_finish: function () {
-            // Check if running in Qualtrics (Direct Injection)
-            if (qthis) {
-                const jsonData = jsPsych.data.get().json();
-                console.log("Saving data to Qualtrics (Direct)...");
+            // Get data
+            const data = jsPsych.data.get();
+            const json_data = data.json();
 
-                // Helper to finish: cleanup and click next
-                function finishExp() {
-                    console.log("Cleaning up and advancing...");
-                    jQuery('#display_stage').remove();
-                    jQuery('#display_stage_background').remove();
-                    if (qthis.clickNextButton) {
-                        qthis.clickNextButton();
-                    } else {
-                        jQuery('#NextButton').click();
-                    }
-                }
-
-                // Use setJSEmbeddedData if available (preferred for async)
-                if (window.Qualtrics && window.Qualtrics.SurveyEngine && window.Qualtrics.SurveyEngine.setJSEmbeddedData) {
-                    Qualtrics.SurveyEngine.setJSEmbeddedData('experiment_data', jsonData)
-                        .then(() => {
-                            console.log("Data saved (Async).");
-                            finishExp();
-                        })
-                        .catch((err) => {
-                            console.error("Error saving (Async):", err);
-                            finishExp();
-                        });
-                } else if (window.Qualtrics && window.Qualtrics.SurveyEngine) {
-                    // Fallback to synchronous
-                    Qualtrics.SurveyEngine.setEmbeddedData('experiment_data', jsonData);
-                    console.log("Data saved (Sync).");
-                    finishExp();
-                } else {
-                    console.warn("Qualtrics API not found, but qthis was passed.");
-                    finishExp();
-                }
+            // Check if in Iframe
+            if (window.self !== window.top) {
+                console.log("Sending data to parent window...");
+                window.parent.postMessage({
+                    type: 'EYEGAZE_COMPLETE',
+                    json: json_data
+                }, '*'); // You can restrict targetOrigin to your Qualtrics domain for security
             } else {
                 // Local testing
+                console.log("Local run finished.");
                 jsPsych.data.displayData();
             }
         }
