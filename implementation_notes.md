@@ -37,11 +37,13 @@ You can configure the experiment using URL parameters:
     - Example: `index.html?study=pilot&sub=001`
 
 ### 5. Qualtrics Integration
-- **Data Transfer**: Uses `window.parent.postMessage()` to send data (CSV) to the parent Qualtrics window.
-- **Qualtrics Script**: `qualtrics_code.js` contains the code to be placed in the Qualtrics "Question JavaScript" editor.
-    - Creates an iframe.
-    - Passes `ResponseID` as `sub`.
-    - Listens for data and saves it to `experiment_data` Embedded Data field.
+- **Method**: Iframe embedding (more robust than direct injection).
+- **Data Transfer**: Uses `window.parent.postMessage()` to send data (JSON) to the parent Qualtrics window.
+- **Qualtrics Script**: `qualtrics_iframe.js` contains the code to be placed in the Qualtrics "Question JavaScript" editor.
+    - Creates an iframe pointing to the GitHub Pages URL.
+    - Listens for the `EYEGAZE_COMPLETE` message.
+    - Saves data to `experiment_data` Embedded Data field.
+- **Setup Guide**: See `QUALTRICS_SETUP.md` for detailed instructions.
 
 ## File Structure
 - `index.html`: Entry point. Loads `main.js` and CSS.
