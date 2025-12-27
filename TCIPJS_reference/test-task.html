@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TCIP Task Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="./jspsych/jspsych.js"></script>
+    <script src="./jspsych/plugin-html-button-response.js"></script>
+    <script src="./jspsych/plugin-tcip-wait.js"></script>
+    <link href="./jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        #jspsych-content {
+            margin: 20px auto;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="test-info">
+      <h3>🧪 TCIP Task Test</h3>
+      <p>This is a test version of the TCIP task to verify it works correctly before using in Qualtrics.</p>
+      <p><strong>Instructions:</strong> Complete the task normally. Data will be saved locally as 'mydata.csv'.</p>
+    </div>
+    
+    <script>
+      /* initialize jsPsych */
+      var jsPsych = initJsPsych({
+        on_finish: function() {
+          // Save data locally
+          jsPsych.data.get().localSave('csv','mydata.csv');
+          console.log('Task completed! Data saved to mydata.csv');
+        }
+      });
+
+      var timeline = [];
+      const trials = 15;
+      let points = 0;
+      let delay = 15000;
+      let circleCount = 0;
+      let progress = 0;
+      let shape = '';
+      let type = '';
+      let outputDelay = 0;
+      const pointStyle = '<p style="font-size:30px;color:white;text-align:left;background-color:#393939;width:800px;height:30px;padding:30px">Current Points: ';
+      const circleInline = '<button class="buttonCircle" style="height:100px;width:100px;';
+      const squareInline = '<button class="buttonSquare" style="height:100px;width:100px;';
+      const waitInline = '</p><br><p style="font-size:25px;text-align:center;width:800px;height:30px;padding:30px">Please wait... Points are loading</p>';
+      const addInline = '</p><br><p style="font-size:25px;text-align:center;width:800px;height:30px;padding:30px">Click the shape to collect your points!</p>';
+      const blockInline = '<p style=width:800px;height:30px;padding:30px></p>';
+
+      function getPoints() {
+          if (type === 'wait') {
+            return pointStyle + points + waitInline
+          }
+          else if (type === 'add') {
+            return pointStyle + points + addInline
+          }
+          else {
+            return pointStyle + points +'</p>'
+          }
+      }
+      
+      function getDelay() {
+          return delay
+      }
+
+      function getShape() {
+          if (type === 'wait') {
+              if (shape === 'Circle') {
+                  return circleInline + 'background-color:grey;"></button>' 
+              }
+              else { 
+                  return squareInline + 'background-color:grey;"></button>'
+              }
+          }
+          else {
+              if (shape === 'Circle') {
+                  return circleInline + '"></button>' 
+              }
+              else { 
+                  return squareInline + '"></button>'
+              }
+          }
+      }
+
+      function getPrompt() {
+          if (shape === 'Circle') {
+              outputDelay = delay / 1000;
+              return '<p>You will receive 5 points in ' + outputDelay + ' seconds</p>'
+          }
+          else {
+              return '<p>You will receive 15 points in 15 seconds</p>'
+          }
+      }
+
+      var instructions_1 = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: '<p>In this task, you will see a circle and a square in the middle of the screen.<br><br><br></p>',
+          choices: ['NEXT'],
+      }
+
+      var instructions_2 = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: '<p>The first time you click on the circle, a delay of 5 seconds gives you five points. <br><br> However, every time you click the circle after that, the delay will increase by one second and you will still get 5 points.</p>',
+          choices: ['NEXT'],
+      }
+
+      var instructions_3 = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: '<p>Clicking on the square will always give you 15 points after a delay of 15 seconds.<br><br><br></p>',
+          choices: ['NEXT'],
+      }
+
+      var instructions_4 = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: '<p>Points are shown in the top left corner. You will have ' + trials + ' chances to gain points.<br><br>The goal is to gain as many points as possible.</p>',
+          choices: ['START'],
+      }
+
+      var choice = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: getPoints,
+          choices: ['Circle', 'Square'],
+          button_html: [circleInline + '"></button>', squareInline + '"></button>'],
+          margin_horizontal: "100px",
+          margin_vertical: "200px",
+          response_ends_trial: true,
+          prompt: blockInline,
+          data: {
+              task: 'choice',
+          },
+          on_finish: function(data){
+              type = 'wait';
+              if (data.response === 0) {
+                  circleCount++;
+                  delay = (circleCount - 1) * 1000 + 5000;
+                  delay > 15000 ? delay = 15000 : delay = delay;
+                  data.delay = delay;  
+                  shape = 'Circle';
+                  data.shape = shape;
+              } 
+              else if (data.response === 1) {
+                  delay = 15000;
+                  data.delay = delay;
+                  shape = 'Square';
+                  data.shape = shape;
+              }
+          }
+      }
+
+      var wait = {
+          type: jsPsychTCIPWait,
+          choices: [shape],
+          stimulus: getPoints,
+          button_html: [getShape],
+          response_ends_trial: false,
+          margin_horizontal: "100px",
+          margin_vertical: "100px",
+          trial_duration: getDelay,
+          prompt: getPrompt,
+          data: {
+              task: 'wait',
+          },
+          on_finish: function(data){ 
+              type = 'add';
+          }
+      }
+
+      var add = {
+          type: jsPsychHtmlButtonResponse,
+          stimulus: getPoints,
+          choices: [shape],
+          button_html: [getShape],
+          response_ends_trial: true,
+          margin_horizontal: "100px",
+          margin_vertical: "100px",
+          prompt: blockInline,
+          data: {
+              task: 'add'
+          },
+          on_finish: function(data){
+              type = 'choice';
+              if (shape === 'Circle') {
+                  points = points + 5;
+                  data.points = points;
+              } 
+              else if (shape === 'Square') {
+                  points = points + 15;
+                  data.points = points
+              }
+          }
+      }
+
+      timeline.push(instructions_1);
+      timeline.push(instructions_2);
+      timeline.push(instructions_3);
+      timeline.push(instructions_4);
+
+      var block = {
+          timeline: [choice, wait, add],
+          repetitions: trials,
+      };
+      timeline.push(block);
+      
+      // Start the task
+      console.log('Starting TCIP task...');
+      jsPsych.run(timeline);
+    </script>
+  </body>
+</html>
+
+
