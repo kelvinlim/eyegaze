@@ -133,7 +133,6 @@ window.initEyegazeTask = function (config) {
             stimulus: '<div style="font-size: 60px; line-height: 1; display: flex; align-items: center; justify-content: center; height: 100vh;">+</div>',
             choices: "NO_KEYS",
             trial_duration: 1000,
-            css_classes: ['fixation-trial'],
             data: { task: 'pre_block_fixation', block: block_number }
         };
         timeline.push(pre_block_fixation);
@@ -149,18 +148,10 @@ window.initEyegazeTask = function (config) {
         }
 
         const trial = {
-            type: isTouchDevice ? jsPsychHtmlButtonResponse : jsPsychImageKeyboardResponse,
-            stimulus: function () {
-                const stim = jsPsych.timelineVariable('stimulus');
-                if (isTouchDevice) {
-                    return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh;">
-                        <img src="${stim}" style="max-width: 90vw; max-height: 50vh; object-fit: contain;">
-                    </div>`;
-                }
-                return stim;
-            },
+            type: isTouchDevice ? jsPsychImageButtonResponse : jsPsychImageKeyboardResponse,
+            stimulus: jsPsych.timelineVariable('stimulus'),
             prompt: isTouchDevice
-                ? '<p style="font-size: 24px; margin-top: 10px;">Looking at me?</p>'
+                ? '<p style="font-size: 24px;">Looking at me?</p>'
                 : '<div style="font-size: 32px; margin-top: 20px; line-height: 1.4;">Looking at me? F (Yes) or J (No)</div>',
             choices: isTouchDevice ? ['Yes', 'No'] : ['f', 'j'],
             stimulus_duration: 200,
