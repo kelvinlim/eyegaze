@@ -144,7 +144,6 @@ window.initEyegazeTask = function (config) {
                 : '<div style="font-size: 48px;">Looking at me? F (Yes) or J (No)</div>',
             choices: isTouchDevice ? ['Yes', 'No'] : ['f', 'j'],
             stimulus_duration: 200,
-            trial_duration: 2000, // 200ms stim + 1800ms fixation
             post_trial_gap: 500,
             response_ends_trial: true,
             css_classes: ['fixation-trial'], // Add class for fixation cross background
