@@ -126,6 +126,17 @@ window.initEyegazeTask = function (config) {
     // --- Create Blocks ---
     models.forEach((currentModel, index) => {
         const block_number = index + 1;
+
+        // Pre-block fixation (1 second)
+        const pre_block_fixation = {
+            type: jsPsychImageKeyboardResponse,
+            stimulus: `${image_base_url}images/fixation_cross.svg`,
+            choices: "NO_KEYS",
+            trial_duration: 1000,
+            data: { task: 'pre_block_fixation', block: block_number }
+        };
+        timeline.push(pre_block_fixation);
+
         const trial_stimuli = [];
         for (let i = 0; i < trials_per_block; i++) {
             const gaze = gazes[Math.floor(Math.random() * gazes.length)];
