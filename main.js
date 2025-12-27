@@ -129,10 +129,11 @@ window.initEyegazeTask = function (config) {
 
         // Pre-block fixation (1 second)
         const pre_block_fixation = {
-            type: jsPsychImageKeyboardResponse,
-            stimulus: `${image_base_url}images/fixation_cross.svg`,
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '',
             choices: "NO_KEYS",
             trial_duration: 1000,
+            css_classes: ['fixation-trial'],
             data: { task: 'pre_block_fixation', block: block_number }
         };
         timeline.push(pre_block_fixation);
