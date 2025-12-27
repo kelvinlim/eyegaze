@@ -141,7 +141,7 @@ window.initEyegazeTask = function (config) {
             stimulus: jsPsych.timelineVariable('stimulus'),
             prompt: isTouchDevice
                 ? '<p style="font-size: 24px;">Looking at me?</p>'
-                : '<div style="font-size: 48px;">Looking at me? F (Yes) or J (No)</div>',
+                : '<div style="font-size: 32px; margin-top: 20px; line-height: 1.4;">Looking at me? F (Yes) or J (No)</div>',
             choices: isTouchDevice ? ['Yes', 'No'] : ['f', 'j'],
             stimulus_duration: 200,
             post_trial_gap: 500,
