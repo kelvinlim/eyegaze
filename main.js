@@ -47,18 +47,21 @@ window.initEyegazeTask = function (config) {
                 rt: trial.rt,
                 response: trial.response,
                 correct: trial.correct,
-                stimulus: trial.stimulus.split('/').pop(), // just filename
+                stimulus: trial.stimulus ? trial.stimulus.split('/').pop() : 'unknown',
                 model: trial.model_id
             }));
             const pruned_json = JSON.stringify(pruned_data_array);
+            const payload_size = pruned_json.length;
+            console.log(`Final payload size: ${payload_size} characters.`);
 
             // Check if in Iframe
             if (window.self !== window.top) {
-                console.log("Sending pruned data (v0.1.13) to parent...");
+                console.log("Sending pruned data (v0.1.14) to parent...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
                     json: pruned_json,
-                    summary: summary_stats
+                    summary: summary_stats,
+                    size: payload_size // Send size info for debugging
                 };
 
                 // Send as object

@@ -67,7 +67,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
         if (data && data.type === 'EYEGAZE_COMPLETE') {
             hasProcessedCompletion = true;
-            console.log("Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.13).");
+            console.log(`Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.14). Payload size: ${data.size || 'unknown'} chars.`);
 
             try {
                 // 1. Save Raw Data (using standard setEmbeddedData for Survey Flow compatibility)
