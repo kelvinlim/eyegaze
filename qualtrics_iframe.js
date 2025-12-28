@@ -1,29 +1,47 @@
+/* EYEGAZE EXPERIMENT INTEGRATION v0.1.18 */
+console.log("EYEGAZE: Script initialized (v0.1.18)");
+
 Qualtrics.SurveyEngine.addOnload(function () {
-    // --- CONFIGURATION ---
+    var qthis = this;
     var task_url = "https://kelvinlim.github.io/eyegaze/";
     var study_id = "${e://Field/study_id}";
     var subject_id = "${e://Field/subject_id}";
-    // ---------------------
 
-    var qthis = this;
-    var container = qthis.getQuestionContainer();
+    // 0. Use QuestionBodyContainer for better isolation from Qualtrics core elements
+    var body = qthis.getQuestionBodyContainer();
+    if (!body) {
+        console.error("EYEGAZE: Could not find QuestionBodyContainer. Falling back to QuestionContainer.");
+        body = qthis.getQuestionContainer();
+    }
 
-    // 0. Ensure container has height context for the overlay (fixes mobile cutoff)
-    container.style.position = 'relative';
-    container.style.minHeight = '650px'; // Minimum height for the task
-    container.style.height = '85vh';     // Dynamic height for larger screens
+    if (!body) {
+        console.error("EYEGAZE: Fatal error - No container found.");
+        return;
+    }
 
-    // 0. Use an overlay to avoid touching the Qualtrics DOM (prevents 'alt' property error)
+    // Ensure parent has position: relative for absolute overlay
+    body.style.position = 'relative';
+    body.style.minHeight = '650px';
+    body.style.height = '85vh';
+
+    // 1. Create the Overlay (Absolute isolation)
     var overlay = document.createElement('div');
     overlay.id = 'eyegaze-overlay';
-    overlay.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: flex; flex-direction: column; overflow: hidden;';
-    container.appendChild(overlay);
+    overlay.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #eee;';
+    body.appendChild(overlay);
 
-    // 1. Add Loading UI
+    // 2. High-Visibility Version Banner (for easy validation)
+    var versionLabel = document.createElement('div');
+    versionLabel.style.cssText = 'position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ccc; z-index: 1001; pointer-events: none;';
+    versionLabel.innerText = "v0.1.18-parent";
+    overlay.appendChild(versionLabel);
+
+    // 3. Loading UI
     var loadingDiv = document.createElement('div');
     loadingDiv.id = 'eyegaze-loading';
     loadingDiv.innerHTML = `
         <div style="text-align: center; padding: 100px 20px; font-family: sans-serif;">
+            <p style="font-size: 12px; color: #999; margin-bottom: 20px;">v0.1.18 ready</p>
             <h3 style="color: #666;">Loading Eye Gaze Task...</h3>
             <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #7a0019; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto;"></div>
         </div>
@@ -31,36 +49,30 @@ Qualtrics.SurveyEngine.addOnload(function () {
     `;
     overlay.appendChild(loadingDiv);
 
-    // 2. Add Iframe (hidden until loaded)
+    // 4. Add Iframe
     var iframe = document.createElement('iframe');
     iframe.src = task_url;
     iframe.id = 'eyegaze-iframe';
     iframe.style.cssText = 'width: 100%; flex-grow: 1; border: none; display: none;';
     overlay.appendChild(iframe);
 
-    // Hide Qualtrics Next button
+    // Hide Next Button
     qthis.hideNextButton();
 
-    // 3. Handshake and Initialization
+    // 5. Handshake
     iframe.onload = function () {
         loadingDiv.style.display = 'none';
         iframe.style.display = 'block';
-
         iframe.contentWindow.postMessage({
             type: 'QUALTRICS_CONFIG',
-            config: {
-                study: study_id,
-                sub: subject_id
-            }
+            config: { study: study_id, sub: subject_id }
         }, '*');
     };
 
-    // 4. Message Listener for Task Completion
+    // 6. Completion Listener
     var hasProcessedCompletion = false;
-
     window.addEventListener('message', function (event) {
         if (hasProcessedCompletion) return;
-
         var data = event.data;
         if (typeof data === 'string') {
             try {
@@ -71,58 +83,45 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
         if (data && data.type === 'EYEGAZE_COMPLETE') {
             hasProcessedCompletion = true;
-            console.log(`Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.17). Payload size: ${data.size || 'unknown'} chars.`);
+            console.log(`EYEGAZE: Complete received (v0.1.18). Size: ${data.size || 'unknown'}`);
 
             try {
-                // Consolidate all data into a single object for easier Qualtrics management
                 var fullResults = {
-                    version: "v0.1.17",
+                    version: "v0.1.18",
                     summary: data.summary || {},
                     trials: typeof data.json === 'string' ? JSON.parse(data.json) : (data.json || []),
-                    metadata: {
-                        study: study_id,
-                        subject: subject_id,
-                        timestamp: new Date().toISOString()
-                    }
+                    metadata: { study: study_id, subject: subject_id, timestamp: new Date().toISOString() }
                 };
 
                 var consolidatedString = JSON.stringify(fullResults);
-
-                // Character limit protection for Qualtrics (~15-20KB safe limit)
                 if (consolidatedString.length > 15000) {
-                    console.warn("Qualtrics Parent: Data exceeds safe limit. Storing summary only.");
-                    fullResults.trials = "[TRUNCATED DUE TO SIZE]";
+                    fullResults.trials = "[TRUNCATED]";
                     consolidatedString = JSON.stringify(fullResults);
                 }
 
-                // Save EVERYTHING to one single field
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Data', consolidatedString);
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Completed', 'Yes');
+                // Final safety check for Qualtrics API
+                if (Qualtrics && Qualtrics.SurveyEngine) {
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Data', consolidatedString);
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Completed', 'Yes');
+                    console.log("EYEGAZE: Data saved.");
+                }
 
-                console.log("Qualtrics Parent: All data consolidated into EYEGAZE_Data.");
-
-                // Show completion feedback
-                overlay.innerHTML = '<div style="text-align:center; padding:100px 20px; color: #7a0019; font-family: sans-serif;"><h3>✅ Task Completed</h3><p>Saving your data...</p><p style="font-size: 0.9em; color: #666;">If the survey does not advance automatically, click "Next".</p></div>';
-
+                overlay.innerHTML = '<div style="text-align:center; padding:100px 20px; color: #7a0019; font-family: sans-serif;"><h3>✅ Task Completed</h3><p>Saving your data...</p></div>';
                 qthis.showNextButton();
-
-                setTimeout(function () {
-                    qthis.clickNextButton();
-                }, 3000);
+                setTimeout(function () { qthis.clickNextButton(); }, 3000);
 
             } catch (err) {
-                console.error("Qualtrics Parent Error:", err);
-                overlay.innerHTML = '<div style="text-align:center; padding:50px; color: red; font-family: sans-serif;"><h3>⚠️ Coordination Error</h3><p>The task completed but there was an error saving data.</p></div>';
+                console.error("EYEGAZE Error:", err);
                 qthis.showNextButton();
             }
         }
     });
 
-    // 5. Timeout Protection
+    // 7. Timeout
     setTimeout(function () {
         var loader = document.getElementById('eyegaze-loading');
-        if (loader && loader.parentElement === overlay && loader.style.display !== 'none') {
-            loader.innerHTML = '<div style="color: red; padding: 20px; text-align: center; font-family: sans-serif;"><h4>Error loading task</h4><p>Please ensure you are connected to the internet and try refreshing.</p></div>';
+        if (loader && loader.style.display !== 'none') {
+            loader.innerHTML = '<p style="color:red; text-align:center;">Load Timeout. Please refresh.</p>';
             qthis.showNextButton();
         }
     }, 15000);
