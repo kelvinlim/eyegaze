@@ -127,16 +127,24 @@ window.initEyegazeTask = function (config) {
     let instruction_trial;
     if (isTouchDevice) {
         instruction_trial = {
-            type: jsPsychHtmlButtonResponse,
-            stimulus: `
-                <h1>Gaze Perception Task</h1>
-                <p>In this task, you will see faces.</p>
-                <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
-                <p>Tap <b>Yes</b> if they are looking at you.</p>
-                <p>Tap <b>No</b> if they are looking away.</p>
-                <p>Tap "Start" to begin.</p>
-            `,
-            choices: ['Start']
+            type: jsPsychInstruction,
+            pages: [
+                `<div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+                    <h1 style="font-size: clamp(24px, 5vw, 36px); margin-bottom: 20px;">Gaze Perception Task</h1>
+                    <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5;">In this task, you will see faces.</p>
+                    <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5;">Your job is to decide if the person is <b>looking at you</b>.</p>
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 30px 0; border: 1px solid #dee2e6;">
+                        <p style="margin-bottom: 10px;"><b>Responses:</b></p>
+                        <p><b>Yes:</b> Press <b>'F'</b> (or tap left checkmark)</p>
+                        <p><b>No:</b> Press <b>'J'</b> (or tap right X)</p>
+                    </div>
+                    <p style="font-size: clamp(14px, 3.5vw, 18px); color: #666;">Press <b>Space</b> to begin.</p>
+                </div>`
+            ],
+            key_forward: ' ',
+            button_label_next: 'Continue',
+            allow_backward: false,
+            show_clickable_nav: true
         };
     } else {
         instruction_trial = {
