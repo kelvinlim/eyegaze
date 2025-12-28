@@ -42,12 +42,15 @@ window.initEyegazeTask = function (config) {
                 accuracy: Math.round(accuracy * 10) / 10
             };
 
+            // Prune raw data to relevant trials only (reduces payload size)
+            const pruned_json = gaze_trials.json();
+
             // Check if in Iframe
             if (window.self !== window.top) {
                 console.log("Sending data to parent window...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
-                    json: all_data.json(),
+                    json: pruned_json,
                     summary: summary_stats
                 };
 
