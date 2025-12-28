@@ -42,12 +42,19 @@ window.initEyegazeTask = function (config) {
                 accuracy: Math.round(accuracy * 10) / 10
             };
 
-            // Prune raw data to relevant trials only (reduces payload size)
-            const pruned_json = gaze_trials.json();
+            // Aggressively prune raw data fields to minimize payload size (fixes 400 error)
+            const pruned_data_array = gaze_trials.values().map(trial => ({
+                rt: trial.rt,
+                response: trial.response,
+                correct: trial.correct,
+                stimulus: trial.stimulus.split('/').pop(), // just filename
+                model: trial.model_id
+            }));
+            const pruned_json = JSON.stringify(pruned_data_array);
 
             // Check if in Iframe
             if (window.self !== window.top) {
-                console.log("Sending data to parent window...");
+                console.log("Sending pruned data (v0.1.13) to parent...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
                     json: pruned_json,
