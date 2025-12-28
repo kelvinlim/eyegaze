@@ -36,15 +36,24 @@
             }, '*');
         };
 
-        // 2. Listen for results
+        // 2. Listen for results (Handle both object and string)
         window.addEventListener('message', function (event) {
-            console.log("Parent received message:", event.data);
-            if (event.data && event.data.type === 'EYEGAZE_COMPLETE') {
+            console.log("Parent received message from origin:", event.origin);
+
+            let data = event.data;
+            if (typeof data === 'string') {
+                try {
+                    data = JSON.parse(data);
+                    console.log("Parent: Parsed stringified message.");
+                } catch (e) { }
+            }
+
+            if (data && data.type === 'EYEGAZE_COMPLETE') {
                 statusDiv.innerText = "Status: Task Complete!";
                 statusDiv.style.background = "#d4edda";
                 summaryDiv.style.display = "block";
-                dataDisplay.innerText = JSON.stringify(event.data.summary, null, 2);
-                console.log("Parent: EYEGAZE_COMPLETE received with summary:", event.data.summary);
+                dataDisplay.innerText = JSON.stringify(data.summary, null, 2);
+                console.log("Parent: EYEGAZE_COMPLETE received with summary:", data.summary);
             }
         });
     </script>

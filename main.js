@@ -45,11 +45,17 @@ window.initEyegazeTask = function (config) {
             // Check if in Iframe
             if (window.self !== window.top) {
                 console.log("Sending data to parent window...");
-                window.parent.postMessage({
+                const payload = {
                     type: 'EYEGAZE_COMPLETE',
                     json: all_data.json(),
                     summary: summary_stats
-                }, '*');
+                };
+
+                // Send as object
+                window.parent.postMessage(payload, '*');
+
+                // Redundant send as string for robustness in some environments
+                window.parent.postMessage(JSON.stringify(payload), '*');
             } else {
                 // Local testing
                 console.log("Local run finished.");

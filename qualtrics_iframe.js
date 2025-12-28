@@ -49,34 +49,66 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
     // 4. Message Listener for Task Completion
     window.addEventListener('message', function (event) {
-        // Optional: origin check
-        // if (event.origin !== "https://kelvinlim.github.io") return;
+        console.log("Qualtrics Parent: Message received from origin:", event.origin);
 
         var data = event.data;
 
-        if (data && data.type === 'EYEGAZE_COMPLETE') {
-            console.log("Task complete. Processing data...");
-
-            // Save Raw Data
-            Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_RawData', data.json);
-
-            // Save Summary Stats (Individual fields)
-            if (data.summary) {
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_TotalTrials', data.summary.total_trials);
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_AvgRT', data.summary.avg_rt);
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Accuracy', data.summary.accuracy);
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_YesCount', data.summary.yes_count);
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_NoCount', data.summary.no_count);
+        // Handle case where message might be a stringified JSON
+        if (typeof data === 'string') {
+            try {
+                var parsed = JSON.parse(data);
+                if (parsed && parsed.type) {
+                    data = parsed;
+                    console.log("Qualtrics Parent: Parsed stringified message.");
+                }
+            } catch (e) {
+                // Not JSON, ignore
             }
+        }
 
-            Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Completed', 'Yes');
+        if (data && data.type === 'EYEGAZE_COMPLETE') {
+            console.log("Qualtrics Parent: EYEGAZE_COMPLETE received.");
 
-            // Show completion feedback and advance
-            container.innerHTML = '<div style="text-align:center; padding:50px; color: green;"><h3>✅ Task Completed</h3><p>Saving your data and moving to the next section...</p></div>';
+            try {
+                // 1. Save Raw Data
+                var rawJson = typeof data.json === 'string' ? data.json : JSON.stringify(data.json || {});
 
-            setTimeout(function () {
-                qthis.clickNextButton();
-            }, 1500);
+                // Qualtrics has a ~20KB limit for embedded data in some contexts
+                if (rawJson.length > 15000) {
+                    console.warn("Qualtrics Parent: Raw data is large (" + rawJson.length + " chars). Truncating for safety.");
+                    rawJson = rawJson.substring(0, 15000) + "... [TRUNCATED]";
+                }
+
+                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_RawData', rawJson);
+                console.log("Qualtrics Parent: Saved EYEGAZE_RawData (length: " + rawJson.length + ")");
+
+                // 2. Save Summary Stats (Explicitly convert to strings)
+                if (data.summary) {
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_TotalTrials', String(data.summary.total_trials || 0));
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_AvgRT', String(data.summary.avg_rt || 0));
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Accuracy', String(data.summary.accuracy || 0));
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_YesCount', String(data.summary.yes_count || 0));
+                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_NoCount', String(data.summary.no_count || 0));
+                    console.log("Qualtrics Parent: Saved summary stats:", data.summary);
+                }
+
+                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Completed', 'Yes');
+                console.log("Qualtrics Parent: Data saving process finished.");
+
+                // Show completion feedback and advance
+                container.innerHTML = '<div style="text-align:center; padding:50px; color: green; font-family: sans-serif;"><h3>✅ Task Completed</h3><p>Saving your data and moving to the next section...</p></div>';
+
+                setTimeout(function () {
+                    console.log("Qualtrics Parent: Clicking next button.");
+                    qthis.clickNextButton();
+                }, 2000);
+
+            } catch (err) {
+                console.error("Qualtrics Parent: Error processing completion message:", err);
+                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Completed', 'Error');
+                container.innerHTML = '<div style="text-align:center; padding:50px; color: red; font-family: sans-serif;"><h3>⚠️ Coordination Error</h3><p>The task completed but there was an error saving data. Please proceed.</p></div>';
+                qthis.showNextButton();
+            }
         }
     });
 
