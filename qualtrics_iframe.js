@@ -71,12 +71,12 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
         if (data && data.type === 'EYEGAZE_COMPLETE') {
             hasProcessedCompletion = true;
-            console.log(`Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.16). Payload size: ${data.size || 'unknown'} chars.`);
+            console.log(`Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.17). Payload size: ${data.size || 'unknown'} chars.`);
 
             try {
                 // Consolidate all data into a single object for easier Qualtrics management
                 var fullResults = {
-                    version: "v0.1.16",
+                    version: "v0.1.17",
                     summary: data.summary || {},
                     trials: typeof data.json === 'string' ? JSON.parse(data.json) : (data.json || []),
                     metadata: {
