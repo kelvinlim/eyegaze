@@ -127,7 +127,7 @@ window.initEyegazeTask = function (config) {
     let instruction_trial;
     if (isTouchDevice) {
         instruction_trial = {
-            type: jsPsychInstruction,
+            type: jsPsychInstructions,
             pages: [
                 `<div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
                     <h1 style="font-size: clamp(24px, 5vw, 36px); margin-bottom: 20px;">Gaze Perception Task</h1>
