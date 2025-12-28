@@ -56,7 +56,7 @@ window.initEyegazeTask = function (config) {
 
             // Check if in Iframe
             if (window.self !== window.top) {
-                console.log("Sending pruned data (v0.1.14) to parent...");
+                console.log("Sending pruned data (v0.1.16) to parent...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
                     json: pruned_json,

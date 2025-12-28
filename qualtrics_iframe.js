@@ -71,39 +71,44 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
         if (data && data.type === 'EYEGAZE_COMPLETE') {
             hasProcessedCompletion = true;
-            console.log(`Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.15). Payload size: ${data.size || 'unknown'} chars.`);
+            console.log(`Qualtrics Parent: EYEGAZE_COMPLETE received (v0.1.16). Payload size: ${data.size || 'unknown'} chars.`);
 
             try {
-                // 1. Save Raw Data (using standard setEmbeddedData for Survey Flow compatibility)
-                var rawJson = typeof data.json === 'string' ? data.json : JSON.stringify(data.json || {});
-                if (rawJson.length > 8000) {
-                    rawJson = rawJson.substring(0, 8000) + "... [TRUNCATED]";
+                // Consolidate all data into a single object for easier Qualtrics management
+                var fullResults = {
+                    version: "v0.1.16",
+                    summary: data.summary || {},
+                    trials: typeof data.json === 'string' ? JSON.parse(data.json) : (data.json || []),
+                    metadata: {
+                        study: study_id,
+                        subject: subject_id,
+                        timestamp: new Date().toISOString()
+                    }
+                };
+
+                var consolidatedString = JSON.stringify(fullResults);
+
+                // Character limit protection for Qualtrics (~15-20KB safe limit)
+                if (consolidatedString.length > 15000) {
+                    console.warn("Qualtrics Parent: Data exceeds safe limit. Storing summary only.");
+                    fullResults.trials = "[TRUNCATED DUE TO SIZE]";
+                    consolidatedString = JSON.stringify(fullResults);
                 }
 
-                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_RawData', rawJson);
-
-                // 2. Save Summary Stats
-                if (data.summary) {
-                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_TotalTrials', String(data.summary.total_trials || 0));
-                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_AvgRT', String(data.summary.avg_rt || 0));
-                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Accuracy', String(data.summary.accuracy || 0));
-                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_YesCount', String(data.summary.yes_count || 0));
-                    Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_NoCount', String(data.summary.no_count || 0));
-                }
-
+                // Save EVERYTHING to one single field
+                Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Data', consolidatedString);
                 Qualtrics.SurveyEngine.setEmbeddedData('EYEGAZE_Completed', 'Yes');
-                console.log("Qualtrics Parent: Data saved via setEmbeddedData.");
+
+                console.log("Qualtrics Parent: All data consolidated into EYEGAZE_Data.");
 
                 // Show completion feedback
                 overlay.innerHTML = '<div style="text-align:center; padding:100px 20px; color: #7a0019; font-family: sans-serif;"><h3>✅ Task Completed</h3><p>Saving your data...</p><p style="font-size: 0.9em; color: #666;">If the survey does not advance automatically, click "Next".</p></div>';
 
-                // Show manual next button as a fallback
                 qthis.showNextButton();
 
                 setTimeout(function () {
-                    console.log("Qualtrics Parent: Attempting manual advance.");
                     qthis.clickNextButton();
-                }, 3000); // 3 second delay to ensure data is processed
+                }, 3000);
 
             } catch (err) {
                 console.error("Qualtrics Parent Error:", err);

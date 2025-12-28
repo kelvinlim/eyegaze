@@ -2,22 +2,16 @@
 
 This guide explains how to embed the `eyegaze` task into a Qualtrics survey and capture summary statistics automatically.
 
-## Step 1: Set Up Survey Flow (CRITICAL)
+### 1. Survey Flow Setup
+Before addding the script, you must define the following **Embedded Data** fields at the top of your **Survey Flow**:
 
-Before adding the task, you **must** define the following Embedded Data fields in your Qualtrics Survey Flow. This ensures Qualtrics has a place to store the data sent by the experiment.
+| Field Name | Description |
+| :--- | :--- |
+| `EYEGAZE_Data` | **Consolidated results**: A JSON string containing all metrics, trial data, and metadata. |
+| `EYEGAZE_Completed` | Set to `Yes` when the task finishes successfully. |
 
-1.  Go to **Survey Flow**.
-2.  Add a new **Embedded Data** element at the very top of your flow.
-3.  Add the following fields (case-sensitive):
-    - `EYEGAZE_RawData`
-    - `EYEGAZE_TotalTrials`
-    - `EYEGAZE_AvgRT`
-    - `EYEGAZE_Accuracy`
-    - `EYEGAZE_YesCount`
-    - `EYEGAZE_NoCount`
-    - `EYEGAZE_Completed`
-
-## Step 2: Create the Task Question
+> [!IMPORTANT]
+> You no longer need to define individual fields for Accuracy, RT, etc. All metrics are now packed into `EYEGAZE_Data`.
 
 1.  In your survey, create a new **Text/Graphic** question.
 2.  Click on the question text and select **HTML View**.
