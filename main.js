@@ -14,19 +14,46 @@ window.initEyegazeTask = function (config) {
         display_element: 'display_stage', // Target specific div
         on_finish: function () {
             // Get data
-            const data = jsPsych.data.get();
-            const json_data = data.json();
+            const all_data = jsPsych.data.get();
+            const gaze_trials = all_data.filter({ task: 'gaze_perception' });
+
+            // Calculate summary stats
+            const total_trials = gaze_trials.count();
+            const avg_rt = gaze_trials.select('rt').mean() || 0;
+            const yes_count = gaze_trials.filterCustom(trial => {
+                return isTouchDevice ? trial.response === 0 : trial.response === 'f';
+            }).count();
+            const no_count = gaze_trials.filterCustom(trial => {
+                return isTouchDevice ? trial.response === 1 : trial.response === 'j';
+            }).count();
+
+            // Accuracy: defined here as correctly identifying "Center" gaze as "Yes" (response 0 or 'f')
+            const center_trials = gaze_trials.filter({ gaze: 'Center' });
+            const correct_center = center_trials.filterCustom(trial => {
+                return isTouchDevice ? trial.response === 0 : trial.response === 'f';
+            }).count();
+            const accuracy = center_trials.count() > 0 ? (correct_center / center_trials.count()) * 100 : 0;
+
+            const summary_stats = {
+                total_trials: total_trials,
+                avg_rt: Math.round(avg_rt),
+                yes_count: yes_count,
+                no_count: no_count,
+                accuracy: Math.round(accuracy * 10) / 10
+            };
 
             // Check if in Iframe
             if (window.self !== window.top) {
                 console.log("Sending data to parent window...");
                 window.parent.postMessage({
                     type: 'EYEGAZE_COMPLETE',
-                    json: json_data
-                }, '*'); // You can restrict targetOrigin to your Qualtrics domain for security
+                    json: all_data.json(),
+                    summary: summary_stats
+                }, '*');
             } else {
                 // Local testing
                 console.log("Local run finished.");
+                console.log("Summary Stats:", summary_stats);
                 jsPsych.data.displayData();
             }
         }
@@ -198,25 +225,42 @@ window.initEyegazeTask = function (config) {
     jsPsych.run(timeline);
 };
 
-// Auto-run if local (not in Qualtrics)
-// We check if 'display_stage' exists, if not we create it or assume body
-if (!window.Qualtrics) {
-    // Wait for DOM
-    window.onload = function () {
-        // Check if we are in the standalone index.html
-        if (document.getElementById('jspsych-target')) {
-            // Create display_stage for compatibility
-            const target = document.getElementById('jspsych-target');
-            target.id = 'display_stage'; // Rename it
+// --- Qualtrics Message Listener ---
+// Listen for configuration messages from Qualtrics parent
+window.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'QUALTRICS_CONFIG') {
+        processConfig(event.data.config);
+    }
+});
 
-            // Parse URL params for local config
+function processConfig(config) {
+    if (window.eyegazeStarted) return;
+    window.eyegazeStarted = true;
+
+    // Create display_stage if it doesn't exist
+    if (!document.getElementById('display_stage')) {
+        const target = document.getElementById('jspsych-target') || document.body;
+        if (target.id !== 'display_stage') {
+            target.id = 'display_stage';
+        }
+    }
+
+    window.initEyegazeTask(config || {});
+}
+
+// Auto-run if local (not in Qualtrics)
+// We check if we are in a standalone mode after a short delay
+setTimeout(() => {
+    if (!window.eyegazeStarted && !window.Qualtrics) {
+        // Check for standalone index.html
+        if (document.getElementById('jspsych-target')) {
             const urlParams = new URLSearchParams(window.location.search);
-            window.initEyegazeTask({
+            processConfig({
                 study: urlParams.get('study'),
                 sub: urlParams.get('sub'),
-                imageBaseUrl: '', // Local relative paths
-                trialsPerBlock: null // Let function parse URL
+                imageBaseUrl: '',
+                trialsPerBlock: null
             });
         }
-    };
-}
+    }
+}, 500);
