@@ -1,0 +1,62 @@
+[
+  {
+    "rt": 1496,
+    "response": "j",
+    "stimulus": "Glo_L10.png"
+  },
+  {
+    "rt": 604,
+    "response": "j",
+    "stimulus": "Glo_R15.png"
+  },
+  {
+    "rt": 639,
+    "response": "j",
+    "stimulus": "Raymond_R30.png"
+  },
+  {
+    "rt": 725,
+    "response": "f",
+    "stimulus": "Raymond_Center.png"
+  },
+  {
+    "rt": 828,
+    "response": "f",
+    "stimulus": "Peter_Center.png"
+  },
+  {
+    "rt": 463,
+    "response": "j",
+    "stimulus": "Peter_R25.png"
+  },
+  {
+    "rt": 810,
+    "response": "f",
+    "stimulus": "Dean_R10.png"
+  },
+  {
+    "rt": 460,
+    "response": "j",
+    "stimulus": "Dean_R30.png"
+  },
+  {
+    "rt": 897,
+    "response": "j",
+    "stimulus": "Oli_L15.png"
+  },
+  {
+    "rt": 573,
+    "response": "j",
+    "stimulus": "Oli_R30.png"
+  },
+  {
+    "rt": 933,
+    "response": "j",
+    "stimulus": "Mary_R20.png"
+  },
+  {
+    "rt": 689,
+    "response": "j",
+    "stimulus": "Mary_L30.png"
+  }
+]

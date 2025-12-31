@@ -1,3 +1,48 @@
+// ===== DATA SAVING CONFIGURATION =====
+// Toggle between 'FASTAPI' and 'QUALTRICS' modes
+const SAVE_METHOD = 'FASTAPI'; // Options: 'QUALTRICS', 'FASTAPI'
+const FASTAPI_ENDPOINT = 'http://localhost:8000/save'; // Change to production URL as needed
+
+// ===== FASTAPI DATA SAVING FUNCTION =====
+/**
+ * Save experiment data to the FastAPI server
+ * @param {string} subject_id - The participant ID
+ * @param {string} data_string - JSON stringified trial data
+ */
+function saveDataToServer(subject_id, data_string) {
+    console.log("Attempting to save data to FastAPI server...");
+
+    fetch(FASTAPI_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            subject_id: subject_id,
+            trial_data: data_string
+        })
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log("Data saved successfully to server!");
+                alert("✓ Data saved successfully!");
+                return response.json();
+            } else {
+                console.error(`Server error: ${response.status}`);
+                alert("✗ Server error: Data not saved. Status: " + response.status);
+            }
+        })
+        .then(data => {
+            if (data) {
+                console.log("Server response:", data);
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+            alert("✗ Network error: Unable to connect to server. Data NOT saved.");
+        });
+}
+
 // Define the initialization function globally
 window.initEyegazeTask = function (config) {
     const study_id = config.study || 'default_study';
@@ -42,24 +87,25 @@ window.initEyegazeTask = function (config) {
                 accuracy: Math.round(accuracy * 10) / 10
             };
 
-            // Aggressively prune raw data fields to minimize payload size (fixes 400 error)
-            const pruned_data_array = gaze_trials.values().map(trial => ({
-                rt: trial.rt,
-                response: trial.response,
-                correct: trial.correct,
-                stimulus: trial.stimulus ? trial.stimulus.split('/').pop() : 'unknown',
-                model: trial.model_id
-            }));
-            const pruned_json = JSON.stringify(pruned_data_array);
-            const payload_size = pruned_json.length;
+            // Get full trial data
+            const full_json = all_data.json();
+            const payload_size = full_json.length;
             console.log(`Final payload size: ${payload_size} characters.`);
+
+            // ===== DATA SAVING LOGIC =====
+            // Determine which save method to use
+            if (SAVE_METHOD === 'FASTAPI') {
+                // Save to FastAPI server
+                console.log("Using FastAPI save method (v0.1.19)...");
+                saveDataToServer(subject_id, full_json);
+            }
 
             // Check if in Iframe
             if (window.self !== window.top) {
-                console.log("Sending pruned data (v0.1.18) to parent...");
+                console.log("Sending all data to parent (v0.1.19)...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
-                    json: pruned_json,
+                    json: full_json,
                     summary: summary_stats,
                     size: payload_size // Send size info for debugging
                 };
@@ -141,10 +187,16 @@ window.initEyegazeTask = function (config) {
                     <p style="font-size: clamp(14px, 3.5vw, 18px); color: #666;">Press <b>Space</b> to begin.</p>
                 </div>`
             ],
-            key_forward: ' ',
+            // Allow spacebar to advance even on touch laptops; buttons remain for tapping
+            key_forward: [' ', 'Spacebar', 'Space'],
             button_label_next: 'Continue',
             allow_backward: false,
-            show_clickable_nav: true
+            allow_keys: true,
+            show_clickable_nav: true,
+            on_load: () => {
+                window.scrollTo(0, 0);
+                if (document && document.body) document.body.focus();
+            }
         };
     } else {
         instruction_trial = {
@@ -155,16 +207,26 @@ window.initEyegazeTask = function (config) {
                 <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
                 <p>Press <b>F</b> if they are looking at you (Yes).</p>
                 <p>Press <b>J</b> if they are looking away (No).</p>
-                <p>Press the <b>Space bar</b> to begin.</p>
+                <p>Press the <b>Space bar</b> or click <b>Start</b> to begin.</p>
+                <p><button id="start-btn" class="jspsych-btn" style="margin-top: 20px;">Start</button></p>
             `,
-            choices: [' ']
+            // Accept common space key identifiers across browsers
+            choices: [' ', 'Spacebar', 'Space', 'space'],
+            on_load: () => {
+                window.scrollTo(0, 0);
+                if (document && document.body) document.body.focus();
+                const btn = document.getElementById('start-btn');
+                if (btn) {
+                    btn.addEventListener('click', () => jsPsych.finishTrial());
+                }
+            }
         };
     }
 
     timeline.push(instruction_trial);
 
     // Trials per block logic
-    let trials_per_block = 5;
+    let trials_per_block = 2;
     if (trials_per_block_override) {
         trials_per_block = trials_per_block_override;
     } else {
