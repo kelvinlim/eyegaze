@@ -178,11 +178,9 @@ window.initEyegazeTask = function (config) {
                     <h1 style="font-size: clamp(24px, 5vw, 36px); margin-bottom: 20px;">Gaze Perception Task</h1>
                     <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5;">In this task, you will see faces.</p>
                     <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5;">Your job is to decide if the person is <b>looking at you</b>.</p>
-                    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 30px 0; border: 1px solid #dee2e6;">
-                        <p style="margin-bottom: 10px;"><b>Responses:</b></p>
-                        <p><b>Yes:</b> Tap the left checkmark</p>
-                        <p><b>No:</b> Tap the right X</p>
-                    </div>
+                    <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5; margin-top: 30px;">
+                        If looking at you press <b>Yes</b>. If not looking at you press <b>No</b>.
+                    </p>
                 </div>`,
             choices: ['Continue'],
             on_load: () => {
