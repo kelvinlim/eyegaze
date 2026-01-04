@@ -194,10 +194,9 @@ window.initEyegazeTask = function (config) {
                 <h1>Gaze Perception Task</h1>
                 <p>In this task, you will see faces.</p>
                 <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
-                <p>Press <b>F</b> if they are looking at you (Yes).</p>
-                <p>Press <b>J</b> if they are looking away (No).</p>
-                <p>Press the <b>Space bar</b> or click <b>Start</b> to begin.</p>
-                <p><button id="start-btn" class="jspsych-btn" style="margin-top: 20px;">Start</button></p>
+                <p>Press <b>F</b> if they are looking at you.</p>
+                <p>Press <b>J</b> if they are looking away.</p>
+                <p>Press the <b>Space bar</b> to begin</p>
             `,
             // Accept common space key identifiers across browsers
             choices: [' ', 'Spacebar', 'Space', 'space'],
