@@ -14,14 +14,16 @@
 
     <style>
         .jspsych-btn {
-            font-size: 40px;
-            /* Makes the text on the button larger */
-            padding: 15px 25px;
+            font-size: clamp(20px, 5vw, 40px);
+            /* Makes the text on the button larger, yet responsive */
+            padding: clamp(10px, 3vw, 15px) clamp(15px, 4vw, 25px);
             /* Makes the button padding larger (top/bottom, left/right) */
-            margin: 40px;
+            margin: clamp(10px, 3vw, 40px);
             /* Adds space around each button, pushing them apart */
-            min-width: 150px;
+            min-width: 120px;
             /* Ensures the buttons have a minimum width */
+            cursor: pointer;
+            /* Ensures iOS registers it as clickable */
         }
 
         .fixation-trial {
