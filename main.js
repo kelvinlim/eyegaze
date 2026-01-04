@@ -96,13 +96,13 @@ window.initEyegazeTask = function (config) {
             // Determine which save method to use
             if (SAVE_METHOD === 'FASTAPI') {
                 // Save to FastAPI server
-                console.log("Using FastAPI save method (v0.1.19)...");
+                console.log("Using FastAPI save method (v0.1.20)...");
                 saveDataToServer(subject_id, full_json);
             }
 
             // Check if in Iframe
             if (window.self !== window.top) {
-                console.log("Sending all data to parent (v0.1.19)...");
+                console.log("Sending all data to parent (v0.1.20)...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
                     json: full_json,
@@ -245,8 +245,8 @@ window.initEyegazeTask = function (config) {
 
         // Pre-block fixation (1 second)
         const pre_block_fixation = {
-            type: jsPsychHtmlKeyboardResponse,
-            stimulus: '<div style="font-size: 60px; line-height: 1; display: flex; align-items: center; justify-content: center; height: 100vh;">+</div>',
+            type: jsPsychImageKeyboardResponse,
+            stimulus: `${image_base_url}images/fixation_cross.svg`,
             choices: "NO_KEYS",
             trial_duration: 1000,
             data: { task: 'pre_block_fixation', block: block_number }

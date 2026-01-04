@@ -21,9 +21,12 @@ The trial structure has been standardized as follows:
     - **Response Ends Trial**: `true` (The trial advances immediately upon response).
 
 ### 3. Fixation Cross
-- **Implementation**: CSS background image trick.
+- **Implementation**: Used `jsPsychImageKeyboardResponse` for pre-block fixation to ensure perfect centering matching the stimuli.
 - **File**: `images/fixation_cross.svg` (512x512px).
-- **Behavior**: The `.fixation-trial` CSS class sets the cross as the background. It is revealed when the stimulus image is removed after 200ms.
+- **Behavior**: 
+    - **Pre-block**: Displayed as a primary stimulus image to ensure it is centered in the same coordinate space as the masks/faces.
+    - **During Trials**: The `.fixation-trial` CSS class sets the cross as the background. It is revealed when the stimulus image is removed after 200ms.
+- **Version Note**: Switched from HTML-based `+` to image-based SVG in v0.1.20 to fix vertical alignment issues.
 
 ### 4. URL Parameters for Testing
 You can configure the experiment using URL parameters:
