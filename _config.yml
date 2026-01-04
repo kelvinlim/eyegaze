@@ -1,0 +1,20 @@
+# Jekyll Configuration
+title: Gaze Perception Task
+description: A gaze perception experiment built with jsPsych.
+
+# Exclude directories from being processed by Jekyll
+exclude:
+  - eyegaze_server
+  - eyegaze_ai_stim
+  - node_modules
+  - .gitignore
+  - README.md
+  - FASTAPI-INTEGRATION.md
+  - QUALTRICS-INTEGRATION.md
+  - walkthrough.md
+  - implementation_plan.md
+  - task.md
+  - copy_images.py
+  - create_fixation.py
+  - .specstory
+  - .cursorindexingignore

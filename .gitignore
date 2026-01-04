@@ -1,0 +1,27 @@
+# Environments
+venv/
+.venv/
+env/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.specstory/
+.cursorindexingignore
+
+# Data
+qualtrics_data/
+*.json
+!_config.yml
