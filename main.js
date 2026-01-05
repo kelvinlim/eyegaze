@@ -213,7 +213,7 @@ window.initEyegazeTask = function (config) {
     timeline.push(instruction_trial);
 
     // Trials per block logic
-    let trials_per_block = 2;
+    let trials_per_block = 30;
     if (trials_per_block_override) {
         trials_per_block = trials_per_block_override;
     } else {
