@@ -33,7 +33,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
     // 2. High-Visibility Version Banner (for easy validation)
     var versionLabel = document.createElement('div');
     versionLabel.style.cssText = 'position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ccc; z-index: 1001; pointer-events: none;';
-    versionLabel.innerText = "v0.1.18-parent";
+    versionLabel.innerText = "v0.1.21-parent";
     overlay.appendChild(versionLabel);
 
     // 3. Loading UI
@@ -41,7 +41,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
     loadingDiv.id = 'eyegaze-loading';
     loadingDiv.innerHTML = `
         <div style="text-align: center; padding: 100px 20px; font-family: sans-serif;">
-            <p style="font-size: 12px; color: #999; margin-bottom: 20px;">v0.1.18 ready</p>
+            <p style="font-size: 12px; color: #999; margin-bottom: 20px;">v0.1.21 ready</p>
             <h3 style="color: #666;">Loading Eye Gaze Task...</h3>
             <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #7a0019; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto;"></div>
         </div>
@@ -87,7 +87,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
             try {
                 var fullResults = {
-                    version: "v0.1.18",
+                    version: "v0.1.21",
                     summary: data.summary || {},
                     trials: typeof data.json === 'string' ? JSON.parse(data.json) : (data.json || []),
                     metadata: { study: study_id, subject: subject_id, timestamp: new Date().toISOString() }

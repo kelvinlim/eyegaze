@@ -96,13 +96,13 @@ window.initEyegazeTask = function (config) {
             // Determine which save method to use
             if (SAVE_METHOD === 'FASTAPI') {
                 // Save to FastAPI server
-                console.log("Using FastAPI save method (v0.1.20)...");
+                console.log("Using FastAPI save method (v0.1.21)...");
                 saveDataToServer(subject_id, full_json);
             }
 
             // Check if in Iframe
             if (window.self !== window.top) {
-                console.log("Sending all data to parent (v0.1.20)...");
+                console.log("Sending all data to parent (v0.1.21)...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
                     json: full_json,
@@ -117,7 +117,7 @@ window.initEyegazeTask = function (config) {
                 window.parent.postMessage(JSON.stringify(payload), '*');
             } else {
                 // Local testing
-                console.log("Local run finished.");
+                console.log("EYEGAZE: Script initialized (v0.1.21)");
                 console.log("Summary Stats:", summary_stats);
                 jsPsych.data.displayData();
             }
@@ -254,8 +254,8 @@ window.initEyegazeTask = function (config) {
             type: isTouchDevice ? jsPsychImageButtonResponse : jsPsychImageKeyboardResponse,
             stimulus: jsPsych.timelineVariable('stimulus'),
             prompt: isTouchDevice
-                ? '<p style="font-size: 24px;">Looking at me?</p>'
-                : '<div style="font-size: 32px; margin-top: 20px; line-height: 1.4;">Looking at me? F (Yes) or J (No)</div>',
+                ? '<div class="trial-prompt" style="font-size: 24px;">Looking at me?</div>'
+                : '<div class="trial-prompt" style="font-size: 32px; line-height: 1.4;">Looking at me? F (Yes) or J (No)</div>',
             choices: isTouchDevice ? ['Yes', 'No'] : ['f', 'j'],
             stimulus_duration: 200,
             post_trial_gap: 500,

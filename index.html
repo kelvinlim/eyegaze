@@ -29,9 +29,91 @@
         .fixation-trial {
             background-image: url('images/fixation_cross.svg');
             background-repeat: no-repeat;
-            background-position: center;
+            background-position: center center;
+            /* Force exact center */
             background-size: 512px 512px;
             /* Ensure it matches the image size */
+        }
+
+        /* 
+           SYMMETRIC GRID LAYOUT: 
+           Guarantees Row 2 (Stimulus) is in the exact vertical center.
+        */
+        html,
+        body,
+        #jspsych-target {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* Eliminated scrollbars */
+        }
+
+        .jspsych-content-wrapper {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #jspsych-content {
+            display: grid;
+            /* 1fr Top Spacer, AUTO Stimulus, 1fr Bottom Area (Prompt/Buttons) */
+            grid-template-rows: 1fr auto 1fr;
+            height: 100%;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            align-items: center;
+            justify-items: center;
+        }
+
+        /* Essential: Invisible spacer to balance the grid */
+        #jspsych-content::before {
+            content: "";
+            grid-row: 1;
+            display: block;
+        }
+
+        /* The stimulus (face, fixation, or html) is locked to Row 2 */
+        #jspsych-content img,
+        #jspsych-content .jspsych-image-keyboard-response-stimulus,
+        #jspsych-content .jspsych-image-button-response-stimulus,
+        #jspsych-content .jspsych-html-keyboard-response-stimulus,
+        #jspsych-content .jspsych-html-button-response-stimulus {
+            grid-row: 2;
+            max-height: 70vh;
+            /* Prevents pushing prompt off-screen */
+            width: auto;
+            position: static !important;
+            /* Override previous absolute centeralization */
+            transform: none !important;
+        }
+
+        /* The prompt is moved to Row 3 (Bottom Area) */
+        .trial-prompt {
+            grid-row: 3;
+            align-self: start;
+            /* Position at the top of the bottom area */
+            margin-top: 15px;
+            color: #333;
+            font-family: sans-serif;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* The buttons are also in Row 3, positioned at the bottom */
+        .jspsych-btn-group {
+            grid-row: 3;
+            align-self: end;
+            /* Position at the bottom of the bottom area */
+            display: flex;
+            gap: clamp(120px, 45vw, 400px);
+            /* Further increased separation as requested */
+            margin-bottom: 40px;
+            /* More space from screen bottom */
         }
     </style>
 
@@ -44,7 +126,7 @@
     <div id="jspsych-target"></div>
     <div id="version-tag"
         style="position: fixed; bottom: 5px; right: 5px; font-family: sans-serif; font-size: 10px; color: #ccc; z-index: 1000;">
-        v0.1.20</div>
+        v0.1.21</div>
 </body>
 
 </html>
