@@ -54,9 +54,34 @@ window.initEyegazeTask = function (config) {
     // Check for touch capability
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
+    // Track progress for incremental saving
+    let lastProgressBlock = 0;
+    const totalBlocks = models.length;
+
     // Initialize jsPsych
     const jsPsych = initJsPsych({
         display_element: 'display_stage', // Target specific div
+        on_data_update: function (data) {
+            // Send incremental progress after each block completes
+            if (window.self !== window.top && data.task === 'gaze_perception') {
+                const gaze_trials = jsPsych.data.get().filter({ task: 'gaze_perception' });
+                const currentBlock = data.block_number;
+                const trialsCompleted = gaze_trials.count();
+
+                // Send progress at block boundaries (when block_number advances)
+                if (currentBlock > lastProgressBlock) {
+                    lastProgressBlock = currentBlock;
+                    const targetOrigin = window._parentOrigin || '*';
+                    window.parent.postMessage({
+                        type: 'TASK_PROGRESS',
+                        trials_completed: trialsCompleted,
+                        blocks_completed: currentBlock,
+                        total_blocks: totalBlocks,
+                        partial_data: gaze_trials.json()
+                    }, targetOrigin);
+                }
+            }
+        },
         on_finish: function () {
             // Get data
             const all_data = jsPsych.data.get();
@@ -94,14 +119,17 @@ window.initEyegazeTask = function (config) {
 
             // ===== DATA SAVING LOGIC =====
             // Determine which save method to use
-            if (SAVE_METHOD === 'FASTAPI') {
+            // Only use standalone FASTAPI save when NOT embedded in an iframe
+            // (when in an iframe, data is sent via postMessage to the parent)
+            const isInIframe = window.self !== window.top;
+            if (SAVE_METHOD === 'FASTAPI' && !isInIframe) {
                 // Save to FastAPI server
                 console.log("Using FastAPI save method (v0.1.21)...");
                 saveDataToServer(subject_id, full_json);
             }
 
             // Check if in Iframe
-            if (window.self !== window.top) {
+            if (isInIframe) {
                 console.log("Sending all data to parent (v0.1.21)...");
                 const payload = {
                     type: 'EYEGAZE_COMPLETE',
@@ -110,11 +138,14 @@ window.initEyegazeTask = function (config) {
                     size: payload_size // Send size info for debugging
                 };
 
+                // Use stored parent origin if available, fall back to '*'
+                const targetOrigin = window._parentOrigin || '*';
+
                 // Send as object
-                window.parent.postMessage(payload, '*');
+                window.parent.postMessage(payload, targetOrigin);
 
                 // Redundant send as string for robustness in some environments
-                window.parent.postMessage(JSON.stringify(payload), '*');
+                window.parent.postMessage(JSON.stringify(payload), targetOrigin);
             } else {
                 // Local testing
                 console.log("EYEGAZE: Script initialized (v0.1.21)");
@@ -301,10 +332,14 @@ window.initEyegazeTask = function (config) {
     jsPsych.run(timeline);
 };
 
-// --- Qualtrics Message Listener ---
-// Listen for configuration messages from Qualtrics parent
+// --- Parent Message Listener ---
+// Listen for configuration messages from parent (TaskShare or Qualtrics)
 window.addEventListener('message', function (event) {
-    if (event.data && event.data.type === 'QUALTRICS_CONFIG') {
+    if (event.data && (event.data.type === 'TASK_CONFIG' || event.data.type === 'QUALTRICS_CONFIG')) {
+        // Store the parent origin for secure postMessage replies
+        if (event.origin && event.origin !== 'null') {
+            window._parentOrigin = event.origin;
+        }
         processConfig(event.data.config);
     }
 });
