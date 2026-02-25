@@ -23,5 +23,5 @@ Thumbs.db
 
 # Data
 qualtrics_data/
-*.json
+#*.json
 !_config.yml
