@@ -56,7 +56,6 @@ window.initEyegazeTask = function (config) {
 
     // Track progress for incremental saving
     let lastProgressBlock = 0;
-    const totalBlocks = models.length;
 
     // Initialize jsPsych
     const jsPsych = initJsPsych({
@@ -76,7 +75,7 @@ window.initEyegazeTask = function (config) {
                         type: 'TASK_PROGRESS',
                         trials_completed: trialsCompleted,
                         blocks_completed: currentBlock,
-                        total_blocks: totalBlocks,
+                        total_blocks: models.length,
                         partial_data: gaze_trials.json()
                     }, targetOrigin);
                 }
