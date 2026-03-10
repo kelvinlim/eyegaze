@@ -296,6 +296,11 @@ window.initEyegazeTask = function (config) {
                 model: jsPsych.timelineVariable('model'),
                 gaze: jsPsych.timelineVariable('gaze'),
                 block_number: block_number
+            },
+            on_finish: function (data) {
+                const expectedYes = data.gaze === 'Center';
+                const respondedYes = isTouchDevice ? data.response === 0 : data.response === 'f';
+                data.correct = expectedYes === respondedYes;
             }
         };
 
