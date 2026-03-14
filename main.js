@@ -43,12 +43,20 @@ function saveDataToServer(subject_id, data_string) {
         });
 }
 
+// --- Stimulus Set Definitions ---
+const STIM_SETS = {
+    ai:   { folder: 'images_ai',   models: ['Dean', 'Peter', 'Raymond', 'Glo', 'Mary', 'Oli'] },
+    orig: { folder: 'images_orig', models: ['Dean', 'Bro2', 'Raymond', 'Glo', 'Sherry', 'Oli'] }
+};
+
 // Define the initialization function globally
 window.initEyegazeTask = function (config) {
     const study_id = config.study || 'default_study';
     const subject_id = config.sub || 'default_sub';
     const image_base_url = config.imageBaseUrl || '';
     const trials_per_block_override = config.trialsPerBlock || null;
+    const stimset_id = config.stimset || 'orig';
+    const stimset = STIM_SETS[stimset_id] || STIM_SETS['orig'];
     const qthis = null; // No longer used in Iframe mode
 
     // Check for touch capability
@@ -157,11 +165,12 @@ window.initEyegazeTask = function (config) {
     // Add properties
     jsPsych.data.addProperties({
         study: study_id,
-        sub: subject_id
+        sub: subject_id,
+        stimset: stimset_id
     });
 
     // --- Stimuli Configuration ---
-    const models = ['Dean', 'Peter', 'Raymond', 'Glo', 'Mary', 'Oli'];
+    const models = [...stimset.models];
 
     // Shuffle models
     function shuffleArray(array) {
@@ -178,7 +187,7 @@ window.initEyegazeTask = function (config) {
     // Helper to build image path
     function getImagePath(model, gaze) {
         // Use .png extension as found in directory
-        return `${image_base_url}images/${model}_${gaze}.png`;
+        return `${image_base_url}${stimset.folder}/${model}_${gaze}.png`;
     }
 
     // Preload images
@@ -188,7 +197,7 @@ window.initEyegazeTask = function (config) {
             images_to_preload.push(getImagePath(model, gaze));
         });
     });
-    images_to_preload.push(`${image_base_url}images/fixation_cross.svg`);
+    images_to_preload.push(`${image_base_url}${stimset.folder}/fixation_cross.svg`);
 
     // --- Timeline ---
     const timeline = [];
@@ -242,19 +251,8 @@ window.initEyegazeTask = function (config) {
 
     timeline.push(instruction_trial);
 
-    // Trials per block logic
-    let trials_per_block = 30;
-    if (trials_per_block_override) {
-        trials_per_block = trials_per_block_override;
-    } else {
-        // Fallback to URL params if not in config (for local testing)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('trials')) trials_per_block = parseInt(urlParams.get('trials'));
-        else if (urlParams.has('test')) {
-            const testVal = urlParams.get('test');
-            trials_per_block = (testVal === 'true') ? 10 : parseInt(testVal);
-        }
-    }
+    // Trials per block (from config or default)
+    const trials_per_block = trials_per_block_override || 30;
 
     // --- Create Blocks ---
     models.forEach((currentModel, index) => {
@@ -263,7 +261,7 @@ window.initEyegazeTask = function (config) {
         // Pre-block fixation (1 second)
         const pre_block_fixation = {
             type: jsPsychImageKeyboardResponse,
-            stimulus: `${image_base_url}images/fixation_cross.svg`,
+            stimulus: `${image_base_url}${stimset.folder}/fixation_cross.svg`,
             choices: "NO_KEYS",
             trial_duration: 1000,
             data: { task: 'pre_block_fixation', block: block_number }
@@ -370,11 +368,19 @@ setTimeout(() => {
         // Check for standalone index.html
         if (document.getElementById('jspsych-target')) {
             const urlParams = new URLSearchParams(window.location.search);
+            // Parse trialsPerBlock from ?test=N or ?trials=N
+            let trialsPerBlock = null;
+            if (urlParams.has('trials')) trialsPerBlock = parseInt(urlParams.get('trials'));
+            else if (urlParams.has('test')) {
+                const testVal = urlParams.get('test');
+                trialsPerBlock = (testVal === 'true') ? 10 : parseInt(testVal);
+            }
             processConfig({
                 study: urlParams.get('study'),
                 sub: urlParams.get('sub'),
+                stimset: urlParams.get('stimset'),
                 imageBaseUrl: '',
-                trialsPerBlock: null
+                trialsPerBlock: trialsPerBlock
             });
         }
     }

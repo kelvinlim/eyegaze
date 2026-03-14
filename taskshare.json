@@ -1,5 +1,24 @@
 {
   "name": "Eye Gaze Task",
   "version": "1.0.0",
-  "entry_point": "index.html"
+  "entry_point": "index.html",
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "stimset": {
+        "type": "string",
+        "enum": ["ai", "orig"],
+        "default": "orig",
+        "description": "Stimulus set: 'ai' for AI-generated faces (512x512), 'orig' for original photos (300x400)"
+      },
+      "study": {
+        "type": "string",
+        "description": "Study identifier"
+      },
+      "trialsPerBlock": {
+        "type": "integer",
+        "description": "Number of trials per block (default: 30)"
+      }
+    }
+  }
 }

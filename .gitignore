@@ -4,6 +4,9 @@ venv/
 env/
 .env/
 
+# task share software
+task-share 
+
 # Python
 __pycache__/
 *.py[cod]
@@ -20,6 +23,9 @@ Thumbs.db
 .idea/
 .specstory/
 .cursorindexingignore
+
+# Original source images (large BMPs)
+original_pics/
 
 # Data
 qualtrics_data/
