@@ -23,7 +23,7 @@ python3 copy_images.py        # Batch resize stimuli
 python3 create_fixation.py    # Generate fixation cross SVG
 ```
 
-**URL parameters for testing:** `?test=1` (10 trials/block), `?test=N` or `?trials=N` (custom count), `?study=NAME`, `?sub=ID`
+**URL parameters for testing:** `?test=true` (10 trials/block), `?test=N` or `?trials=N` (N trials/block; `trials` takes precedence), `?study=NAME`, `?sub=ID`, `?stimset=NAME`. Default is 30 trials/block × 6 blocks = 180 total.
 
 ## Architecture
 
