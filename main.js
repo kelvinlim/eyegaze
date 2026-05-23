@@ -213,14 +213,15 @@ window.initEyegazeTask = function (config) {
     if (isTouchDevice) {
         instruction_trial = {
             type: jsPsychHtmlButtonResponse,
-            stimulus: `<div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+            css_classes: ['instruction-screen'],
+            stimulus: `<div class="instruction-center"><div class="instruction-center__inner" style="max-width: 600px; padding: 20px; font-family: sans-serif;">
                     <h1 style="font-size: clamp(24px, 5vw, 36px); margin-bottom: 20px;">Gaze Perception Task</h1>
                     <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5;">In this task, you will see faces.</p>
                     <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5;">Your job is to decide if the person is <b>looking at you</b>.</p>
                     <p style="font-size: clamp(16px, 4vw, 20px); line-height: 1.5; margin-top: 30px;">
                         If looking at you press <b>Yes</b>. If not looking at you press <b>No</b>.
                     </p>
-                </div>`,
+                </div></div>`,
             choices: ['Continue'],
             on_load: () => {
                 window.scrollTo(0, 0);
@@ -229,13 +230,18 @@ window.initEyegazeTask = function (config) {
     } else {
         instruction_trial = {
             type: jsPsychHtmlKeyboardResponse,
+            css_classes: ['instruction-screen'],
             stimulus: `
-                <h1>Gaze Perception Task</h1>
-                <p>In this task, you will see faces.</p>
-                <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
-                <p>Press <b>F</b> if they are looking at you.</p>
-                <p>Press <b>J</b> if they are looking away.</p>
-                <p>Press the <b>Space bar</b> to begin</p>
+                <div class="instruction-center">
+                    <div class="instruction-center__inner">
+                        <h1>Gaze Perception Task</h1>
+                        <p>In this task, you will see faces.</p>
+                        <p>Your job is to decide if the person is looking <b>at you</b> or <b>away from you</b>.</p>
+                        <p>Press <b>F</b> if they are looking at you.</p>
+                        <p>Press <b>J</b> if they are looking away.</p>
+                        <p>Press the <b>Space bar</b> to begin</p>
+                    </div>
+                </div>
             `,
             // Accept common space key identifiers across browsers
             choices: [' ', 'Spacebar', 'Space', 'space'],

@@ -41,7 +41,9 @@
         */
         html,
         body,
-        #jspsych-target {
+        #jspsych-target,
+        #display_stage,
+        .jspsych-display-element {
             height: 100%;
             width: 100%;
             margin: 0;
@@ -58,7 +60,8 @@
             justify-content: center;
         }
 
-        #jspsych-content {
+        #jspsych-content,
+        .jspsych-content {
             display: grid;
             /* 1fr Top Spacer, AUTO Stimulus, 1fr Bottom Area (Prompt/Buttons) */
             grid-template-rows: 1fr auto 1fr;
@@ -71,7 +74,8 @@
         }
 
         /* Essential: Invisible spacer to balance the grid */
-        #jspsych-content::before {
+        #jspsych-content::before,
+        .jspsych-content::before {
             content: "";
             grid-row: 1;
             display: block;
@@ -82,7 +86,12 @@
         #jspsych-content .jspsych-image-keyboard-response-stimulus,
         #jspsych-content .jspsych-image-button-response-stimulus,
         #jspsych-content .jspsych-html-keyboard-response-stimulus,
-        #jspsych-content .jspsych-html-button-response-stimulus {
+        #jspsych-content .jspsych-html-button-response-stimulus,
+        .jspsych-content img,
+        .jspsych-content .jspsych-image-keyboard-response-stimulus,
+        .jspsych-content .jspsych-image-button-response-stimulus,
+        .jspsych-content .jspsych-html-keyboard-response-stimulus,
+        .jspsych-content .jspsych-html-button-response-stimulus {
             grid-row: 2;
             max-height: 70vh;
             /* Prevents pushing prompt off-screen */
@@ -92,12 +101,38 @@
             transform: none !important;
         }
 
+        .instruction-center {
+            min-height: 78vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .instruction-center__inner {
+            max-width: 680px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .instruction-screen .jspsych-html-keyboard-response-stimulus,
+        .instruction-screen .jspsych-html-button-response-stimulus {
+            position: absolute !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) !important;
+            width: min(700px, 92vw);
+            max-width: 700px;
+            margin: 0;
+        }
+
         /* The prompt is moved to Row 3 (Bottom Area) */
         .trial-prompt {
             grid-row: 3;
             align-self: start;
             /* Position at the top of the bottom area */
-            margin-top: 15px;
+            margin-top: clamp(8px, 2vh, 14px);
+            padding: 0 16px;
             color: #333;
             font-family: sans-serif;
             text-align: center;
@@ -110,14 +145,13 @@
             align-self: end;
             /* Position at the bottom of the bottom area */
             display: flex;
-            gap: clamp(120px, 45vw, 400px);
-            /* Further increased separation as requested */
-            margin-bottom: 40px;
-            /* More space from screen bottom */
+            gap: clamp(40px, 18vw, 140px);
+            margin-bottom: clamp(16px, 4vh, 32px);
+            padding: 0 16px;
         }
     </style>
 
-    <script src="main.js?v=20251230_2042"></script>
+    <script src="main.js?v=20260523_01"></script>
 </head>
 
 <body>
