@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-22
+
+### Changed
+- **Instruction screen centering**: Updated instruction trials to use explicit centering wrappers (`instruction-center`, `instruction-center__inner`) so intro text aligns with the true screen midpoint on desktop and touch flows.
+- **Instruction trial CSS targeting**: Added an instruction-only class (`instruction-screen`) and focused centering rules to avoid affecting non-instruction trial layouts.
+- **Stimulus alignment selector coverage**: Expanded layout selectors to cover both `#jspsych-content` and `.jspsych-content` variants to improve compatibility across jsPsych render paths.
+- **Script cache-busting update**: Bumped the `main.js` query version in `index.html` to ensure GitHub Pages clients fetch the updated behavior after deployment.
+
 ## 2026-03-14
 
 ### Added
